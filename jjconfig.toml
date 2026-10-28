@@ -1,0 +1,50 @@
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+
+[aliases]
+edit-next = ['edit', '@+ & ~discardable()']
+edit-prev = ['edit', '@- & ~discardable()']
+edit-head = ["edit", "-r", "coalesce(roots(bookmarks() & descendants(@)), @)"]
+ii = ['--ignore-immutable']
+resolve-into-parent = ['resolve','-r', '@-']
+review = ['--ignore-immutable', 'edit']
+review-next = ['--ignore-immutable', 'edit', "@+ & ~discardable()"]
+review-prev = ['--ignore-immutable', 'edit', "@- & ~discardable()"]
+insert-new-parent = ['new', '--after', '@-', '--before', '@']
+insert-new-child = ['new', '--insert-after', '@']
+
+blame = ['file', 'annotate']
+mdiff = ['diff', '--from', 'trunk()']
+
+ls = ['log', '--no-graph', '-T', 'diff.files().map(|f| f.target().path()).join("\n") ++ "\n"']
+la = ["log", "-r", "connected(main@origin-..@)"]
+lab = ["log", "-r", "current_branch_ancestors()"]
+ld = ["log", "-r", "connected(descendants(@-))"]
+ldb = ["log", "-r", "current_branch_descendants()"]
+law = ["log", "-r", "active_work()"]
+lwb = ["log", "-r", "working_branch()"]
+l = ["log"]
+
+absorb-into-parents = ['absorb', '--into', 'current_branch_ancestors()']
+absorb-into-child = ['absorb', '--into', 'current_branch_descendants()']
+
+tug = ["bookmark", "move", "--from", "heads(::@- & bookmarks())", "--to", "@-"]
+
+[revsets]
+log = 'current_branch_descendants() | current_branch_ancestors()'
+
+[revset-aliases]
+'working_branch()' = 'roots(ancestors(@) & bookmarks())::heads(descendants(@) & bookmarks())'
+
+'active_work()' = '(ancestors(@) | descendants(@-))'
+'discardable()' = '~immutable_heads() & mutable() & (description(exact:"") | empty())'
+'user(x)' = 'author(x) | committer(x)'
+'mine()' = 'user("noah@super.gd") | user("noah.a.silvera@gmail.com") | user("noah.a.silvera@icloud.com")'
+'current_branch_ancestors()' = 'connected(@ | (main@origin-..@) & ~discardable())'
+'current_branch_descendants()' = 'connected(@ | (descendants(@-)) & ~discardable())'
+
+'wip()' = 'description(glob:"wip:*")'
+'stash()' = 'description(glob:"stash:*")'
+
+[ui]
+bookmark-list-sort-keys = ["committer-date-"]
+default-command = "log"
